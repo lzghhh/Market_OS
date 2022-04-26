@@ -1,4 +1,4 @@
-package MarketModel;
+
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -54,6 +54,8 @@ public class ItemProcessor {
       while(rs0.next()) {
         validflagAmount = rs0.getInt("couponAmount");
       }
+      rs0.close();
+      cs0.close();
       if (validflagAmount != -1) {
         this.totalCost -= validflagAmount;
       }
@@ -68,6 +70,7 @@ public class ItemProcessor {
       cs.setInt(2, CardAmount);
       cs.setString(3, bank);
       cs.execute();
+      cs.close();
 
       Statement statement0 = connection.createStatement();
       String sql2 = "SELECT MAX(cardID) FROM card";
@@ -82,6 +85,7 @@ public class ItemProcessor {
       CallableStatement cs3 = connection.prepareCall(sql3);
       cs3.setInt(1, cardID);
       cs3.execute();
+      cs3.close();
 
       Statement statement1 = connection.createStatement();
       String sql1 = "SELECT MAX(transacID) FROM onlineTransaction";
@@ -102,6 +106,7 @@ public class ItemProcessor {
         csLoop.setInt(2, itemID);
         csLoop.setInt(3, this.items.get(itemID));
         csLoop.execute();
+        csLoop.close();
       }
 
     } else {
@@ -121,6 +126,8 @@ public class ItemProcessor {
       if (CardAmount + CashAmount < this.totalCost ) {
         throw new SQLException();
       }
+      rs0.close();
+      cs0.close();
 
       String sql = "CALL CARDPAYMENT(?, ?, ?)";
       CallableStatement cs = connection.prepareCall(sql);
@@ -128,6 +135,7 @@ public class ItemProcessor {
       cs.setInt(2, CardAmount);
       cs.setString(3, bank);
       cs.execute();
+      cs.close();
 
       Statement statement0 = connection.createStatement();
       String sql2 = "SELECT MAX(cardID) FROM card";
@@ -142,6 +150,7 @@ public class ItemProcessor {
       CallableStatement cs4 = connection.prepareCall(sql4);
       cs4.setInt(1, CashAmount);
       cs4.execute();
+      cs4.close();
 
       Statement statement5 = connection.createStatement();
       String sql5 = "SELECT MAX(cashID) FROM cash";
@@ -157,6 +166,7 @@ public class ItemProcessor {
       cs3.setInt(1, cardID);
       cs3.setInt(2, cashID);
       cs3.execute();
+      cs3.close();
 
       Statement statement1 = connection.createStatement();
       String sql1 = "SELECT MAX(transacID) FROM physicalTransaction";
@@ -177,6 +187,7 @@ public class ItemProcessor {
         csLoop.setInt(2, itemID);
         csLoop.setInt(3, this.items.get(itemID));
         csLoop.execute();
+        csLoop.close();
       }
     }
     return true;

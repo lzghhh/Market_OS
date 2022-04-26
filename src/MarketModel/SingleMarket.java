@@ -1,4 +1,4 @@
-package MarketModel;
+
 
 import java.net.ConnectException;
 import java.sql.CallableStatement;
@@ -24,6 +24,10 @@ public class SingleMarket {
     cs.execute();
   }
 
+  public SingleMarket(String username) {
+    this.managerName = username;
+  }
+
   public Integer showPassword(Connection connection) throws SQLException {
     int password = -1;
     Statement statement = connection.createStatement();
@@ -33,6 +37,7 @@ public class SingleMarket {
     while (rs.next()) {
       password = rs.getInt("managerID");
     }
+    rs.close();
     return password;
   }
 
@@ -45,6 +50,7 @@ public class SingleMarket {
     while (rs.next()) {
       username = rs.getString("managerNmame");
     }
+    rs.close();
     return username;
   }
 
@@ -53,9 +59,10 @@ public class SingleMarket {
     String sql = "CALL INSERTITEM(?, ?, ?)";
     CallableStatement cs = connection.prepareCall(sql);
     cs.setString(1, itemName);
-    cs.setInt(2, itemPrice);
+    cs.setInt(2, itemAmount);
     cs.setInt(3, itemPrice);
     cs.execute();
+    cs.close();
     return true;
   }
 
@@ -69,14 +76,12 @@ public class SingleMarket {
     return true;
   }
 
-  public boolean addEmployee(String nameIN, String genderIN, String description,
-                             Date employedDateIN, Connection connection) throws SQLException {
-    String sql = "CALL ADDEMPLOYEE(?, ?, ?, ?)";
+  public boolean addEmployee(String nameIN, String genderIN, String description, Connection connection) throws SQLException {
+    String sql = "CALL ADDEMPLOYEE(?, ?, ?)";
     CallableStatement cs = connection.prepareCall(sql);
     cs.setString(1, nameIN);
     cs.setString(2, genderIN);
     cs.setString(3, description);
-    cs.setDate(4, employedDateIN);
     cs.execute();
     cs.close();
     return true;
@@ -219,11 +224,11 @@ public class SingleMarket {
       int itemID = rs.getInt("itemID");
       String itemName = rs.getString("itemName");
       int itemCount = rs.getInt("itemCount");
-      int ItemAmount = rs.getInt("ItemAmount");
+      int ItemPrice= rs.getInt("ItemPrice");
       String rowResult = "itemID: " + Integer.toString(itemID) + "     " +
               "itemName: " + itemName+ "     " + "itemCount: " +
               Integer.toString(itemCount) + "     "  +
-              "ItemAmount: " + Integer.toString(ItemAmount);
+              "ItemPrice: " + Integer.toString(ItemPrice);
       results.add(rowResult);
     }
     rs.close();

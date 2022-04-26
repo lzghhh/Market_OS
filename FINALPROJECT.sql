@@ -1,4 +1,4 @@
-DROP DATABASE IF EXISTS MARD;
+-- DROP DATABASE IF EXISTS MARD;
 CREATE DATABASE IF NOT EXISTS MARD;
 USE MARD;
 
@@ -133,20 +133,21 @@ DELIMITER $$
 CREATE PROCEDURE ADDMANAGER(IN managerNmameIN VARCHAR(64), IN genderIN VARCHAR(64))
 	BEGIN 
     IF EXISTS (SELECT managerID FROM manager) THEN
-		DELETE FROM manager WHERE managerID = (SELECT managerID FROM manager);
+		DELETE FROM manager WHERE managerID = 1;
 	END IF;
-    IF NOT EXISTS (SELECT managerID FROM manager WHERE managerNmame = managerNmameIN) THEN
-		INSERT INTO manager(managerNmame, gender, employedDate) VALUES (managerNmameIN, genderIN, CURRENT_DATE());
+    IF NOT EXISTS (SELECT managerID FROM manager WHERE managerName = managerNmameIN) THEN
+		INSERT INTO manager(managerName, gender, employedDate) VALUES (managerNmameIN, genderIN, CURRENT_DATE());
 	END IF;
     END $$
-DELIMITER;
+DELIMITER ;
+
 
 
 DELIMITER $$
 CREATE PROCEDURE ADDEMPLOYEE(IN employeeNameIN VARCHAR(64), IN genderIN VARCHAR(64), IN jobDescriptionIN VARCHAR(64))
 	BEGIN 
-    IF NOT EXISTS (SELECT employeeID FROM employee WHERE name = employeeNameIN AND employedDate = employedDateIN) THEN
-		INSERT INTO employee(name, gender, jobDescription, employedDate) VALUES 
+    IF NOT EXISTS (SELECT employeeID FROM employee WHERE name = employeeNameIN) THEN
+		INSERT INTO employee(name, gender, jobDescription, employeeDate) VALUES 
         (employeeNameIN, genderIN, jobDescriptionIN, CURRENT_DATE());
 	END IF;
     END $$
@@ -212,10 +213,10 @@ CREATE PROCEDURE INSERTITEM(IN itemNameIN VARCHAR(64), IN itemAmountIN INT, IN i
 	BEGIN 
     IF EXISTS (SELECT itemID FROM item WHERE itemName = itemNameIN)  THEN
 		UPDATE item 
-        SET itemAmount = itemAmount + itemAmountIN WHERE itemNameIN = itemName;
+        SET itemCount = itemCount + itemAmountIN WHERE itemNameIN = itemName;
 	END IF;
     IF NOT EXISTS (SELECT itemID FROM item WHERE itemName = itemNameIN) THEN 
-		INSERT INTO item(itemName, itemAmount, itemPrice) VALUES (itemNameIN, itemAmountIN, itemPriceIN);
+		INSERT INTO item(itemName, itemCount, itemPrice) VALUES (itemNameIN, itemAmountIN, itemPriceIN);
 	END IF;
     END $$
 DELIMITER ;
@@ -225,7 +226,7 @@ CREATE PROCEDURE DELITEM(IN itemIDIN INT, IN itemAmountDecrease INT)
 BEGIN 
 	IF EXISTS (SELECT * FROM item WHERE itemID = itemIDIN) THEN
 		UPDATE item
-		SET itemAmount = itemAmount - itemAmountDecrease
+		SET itemCount = itemCount - itemAmountDecrease
 		WHERE itemID = itemIDIN;
 	END IF;
 END $$
@@ -235,7 +236,7 @@ DELIMITER $$
 CREATE PROCEDURE ADDCOUPON(IN couponPWDIN INT, IN couponAmountIN INT, IN managerNameIN VARCHAR(64))
 BEGIN 
 	IF NOT EXISTS (SELECT * FROM coupon WHERE couponPWDIN = couponPWD) THEN
-		INSERT INTO coupon(couponPWD, couponAmount, managerName) VALUES (couponPWDIN, couponAmountIN, managerNameIN);
+		INSERT INTO coupon(couponPWD, couponAmount, managerID) VALUES (couponPWDIN, couponAmountIN, managerNameIN);
 	END IF;
 END $$
 DELIMITER ;
@@ -248,4 +249,3 @@ BEGIN
 	END IF;
 END $$
 DELIMITER ;
-    
