@@ -36,9 +36,10 @@ CREATE TABLE cash (
 
 
 CREATE TABLE transportation (
-	packageID INT NOT NULL PRIMARY KEY, 
+	packageID INT NOT NULL PRIMARY KEY AUTO_INCREMENT, 
     destination VARCHAR(64) NOT NULL,
-    receiverName VARCHAR(64) NOT NULL
+    receiverName VARCHAR(64) NOT NULL, 
+    shippingCompany VARCHAR(64) NOT NULL
 );
 
 
@@ -60,7 +61,7 @@ CREATE TABLE onlineTransaction (
     transacDate DATE NOT NULL,
     transacTime TIME NOT NULL,
 	CardPaymentID INT NOT NULL,
---     DeliveryID INT NOT NULL,
+    packageID INT NOT NULL,
 	FOREIGN KEY (CardPaymentID) REFERENCES card(cardID)
     ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -102,15 +103,14 @@ CREATE TABLE coupon (
 	couponID INT NOT NULL PRIMARY KEY AUTO_INCREMENT, 
     couponPWD INT NOT NULL, 
     couponAmount INT NOT NULL,
-    managerID INT NOT NULL,
-    FOREIGN KEY (managerID) REFERENCES manager(managerID)
-    ON UPDATE CASCADE ON DELETE CASCADE
+    managerNameIN VARCHAR(64) NOT NULL
 );
+
 
 DELIMITER $$
 CREATE PROCEDURE VALIDCOUPON(IN couponPWDIN INT)
 	BEGIN
-    SELECT IFNULL(couponAmount, -1) FROM COUPON WHERE couponPWDIN = couponPWD;
+    SELECT IFNULL(couponAmount, -1) AS couponAmount FROM COUPON WHERE couponPWDIN = couponPWD;
     END $$
 DELIMITER ;
 
@@ -128,12 +128,19 @@ CREATE PROCEDURE CASHPAYMENT(IN CashPaymentAmountIN INT)
     END $$
 DELIMITER ;
 
+DELIMITER $$
+CREATE PROCEDURE GETMANAGERNAME()
+	BEGIN
+    SELECT managerName FROM manager;
+    END $$
+DELIMITER ;
+
 
 DELIMITER $$
 CREATE PROCEDURE ADDMANAGER(IN managerNmameIN VARCHAR(64), IN genderIN VARCHAR(64))
 	BEGIN 
     IF EXISTS (SELECT managerID FROM manager) THEN
-		DELETE FROM manager WHERE managerID = 1;
+		DELETE FROM manager;
 	END IF;
     IF NOT EXISTS (SELECT managerID FROM manager WHERE managerName = managerNmameIN) THEN
 		INSERT INTO manager(managerName, gender, employedDate) VALUES (managerNmameIN, genderIN, CURRENT_DATE());
@@ -174,9 +181,9 @@ DELIMITER ;
 
 
 DELIMITER $$
-CREATE PROCEDURE CREATEOnlineTransac(IN cardIDIN INT)
+CREATE PROCEDURE CREATEOnlineTransac(IN cardIDIN INT, IN packageIDIN INT)
 	BEGIN 
-    INSERT INTO onlineTransaction(transacDate, transacTime, CardPaymentID) VALUES (CURRENT_DATE(), CURRENT_TIME(), cardIDIN);
+    INSERT INTO onlineTransaction(transacDate, transacTime, CardPaymentID, packageID) VALUES (CURRENT_DATE(), CURRENT_TIME(), cardIDIN, packageIDIN);
     END $$
 DELIMITER ;
 
@@ -236,7 +243,7 @@ DELIMITER $$
 CREATE PROCEDURE ADDCOUPON(IN couponPWDIN INT, IN couponAmountIN INT, IN managerNameIN VARCHAR(64))
 BEGIN 
 	IF NOT EXISTS (SELECT * FROM coupon WHERE couponPWDIN = couponPWD) THEN
-		INSERT INTO coupon(couponPWD, couponAmount, managerID) VALUES (couponPWDIN, couponAmountIN, managerNameIN);
+		INSERT INTO coupon(couponPWD, couponAmount, managerNameIN) VALUES (couponPWDIN, couponAmountIN, managerNameIN);
 	END IF;
 END $$
 DELIMITER ;
@@ -248,4 +255,18 @@ BEGIN
 		DELETE FROM coupon WHERE couponIDIN = couponID;
 	END IF;
 END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE SHOWCURRENTCOUPON()
+	BEGIN
+    SELECT *, manager.managerID as ManagerID FROM coupon INNER JOIN manager ON coupon.managerNameIN = manager.managerName;
+    END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE CREATETRANSPORTATION(IN destinationIN VARCHAR(64), IN receiverNameIN VARCHAR(64), IN shippingCompanyIN VARCHAR(64))
+	BEGIN 
+	INSERT INTO transportation(destination, receiverName, shippingCompany) VALUES (destinationIN, receiverNameIN, shippingCompanyIN);
+    END $$
 DELIMITER ;
